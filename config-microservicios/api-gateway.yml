@@ -1,0 +1,103 @@
+server:
+  address: 0.0.0.0
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: usuario-service
+              uri: lb://usuario-service
+              predicates:
+                - Path=/api/v1/usuario/**, /v3/api-docs/usuario-service
+              filters:
+                - RewritePath=/v3/api-docs/usuario-service, /v3/api-docs
+
+            - id: carrito-service
+              uri: lb://carrito-service
+              predicates:
+                - Path=/api/v1/carritos/**, /v3/api-docs/carrito-service
+              filters:
+                - RewritePath=/v3/api-docs/carrito-service, /v3/api-docs
+
+            - id: inventario-service
+              uri: lb://inventario-service
+              predicates:
+                - Path=/api/v1/inventario/**, /v3/api-docs/inventario-service
+              filters:
+                - RewritePath=/v3/api-docs/inventario-service, /v3/api-docs
+
+            - id: pagos-service
+              uri: lb://pagos-service
+              predicates:
+                - Path=/api/v1/pagos/**, /v3/api-docs/pagos-service
+              filters:
+                - RewritePath=/v3/api-docs/pagos-service, /v3/api-docs
+
+            - id: facturaciones-service
+              uri: lb://facturaciones-service
+              predicates:
+                - Path=/api/v1/facturas/**, /v3/api-docs/facturaciones-service
+              filters:
+                - RewritePath=/v3/api-docs/facturaciones-service, /v3/api-docs
+
+            - id: transporte-service
+              uri: lb://transporte-service
+              predicates:
+                - Path=/api/v1/transportes/**, /v3/api-docs/transporte-service
+              filters:
+                - RewritePath=/v3/api-docs/transporte-service, /v3/api-docs
+
+            - id: producto-service
+              uri: lb://producto-service
+              predicates:
+                - Path=/api/v1/productos/**, /v3/api-docs/producto-service
+              filters:
+                - RewritePath=/v3/api-docs/producto-service, /v3/api-docs
+
+            - id: notificaciones-service
+              uri: lb://notificaciones-service
+              predicates:
+                - Path=/api/v1/notificaciones/**, /v3/api-docs/notificaciones-service
+              filters:
+                - RewritePath=/v3/api-docs/notificaciones-service, /v3/api-docs
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Usuario
+        url: /v3/api-docs/usuario-service
+
+      - name: Carrito
+        url: /v3/api-docs/carrito-service
+
+      - name: Inventario
+        url: /v3/api-docs/inventario-service
+
+      - name: Pagos
+        url: /v3/api-docs/pagos-service
+
+      - name: Facturas
+        url: /v3/api-docs/facturaciones-service
+
+      - name: Transporte
+        url: /v3/api-docs/transporte-service
+
+      - name: Productos
+        url: /v3/api-docs/producto-service
+
+      - name: Notificaciones
+        url: /v3/api-docs/notificaciones-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
