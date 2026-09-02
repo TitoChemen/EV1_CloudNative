@@ -5,6 +5,11 @@ server:
 spring:
   application:
     name: usuario-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/8680c901-cdee-41b9-b489-95b35c8ffaf0/v2.0  
   datasource:
     # Cambiar 'bd_usuario' por la base de datos correspondiente a cada servicio
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/bd_usuario}
