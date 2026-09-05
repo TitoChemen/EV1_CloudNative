@@ -12,6 +12,7 @@ El ecosistema de desarrollo de este proyecto Frontend utiliza las siguientes her
 
 npm create vite@latest
 npm install react-router-dom
+npm i lucide-react
 
 ### 3. intalación de MSAL en el Frontend
 
