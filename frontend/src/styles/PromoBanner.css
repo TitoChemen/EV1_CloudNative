@@ -1,8 +1,7 @@
 .banner-wrapper {
   width: 100%;
-  max-width: 1300px;
-  margin: 0 auto;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(90deg, #0284c7 0%, #00b4d8 30%, #0d3b66 50%, #00b4d8 70%, #059669 100%);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   box-sizing: border-box;
 }
 
@@ -14,23 +13,25 @@
   padding: 8px 12px;
   font-size: 0.95rem;
   font-weight: 500;
-  border-radius: 4px 4px 0 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .banner-top-bar strong {
   font-weight: 800;
 }
 
-/* Lienzo con gradiente */
+/* Lienzo centrado de 1300px */
 .banner-content {
   position: relative;
+  max-width: 1300px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(90deg, #0284c7 0%, #00b4d8 30%, #0d3b66 50%, #00b4d8 70%, #059669 100%);
   padding: 30px 45px;
   min-height: 320px;
-  overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Tarjetas de Producto */
@@ -45,6 +46,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .product-img-box {
@@ -60,6 +63,10 @@
   max-height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.3));
+}
+
+.product-info {
+  width: 100%;
 }
 
 .product-title {
@@ -79,10 +86,12 @@
 .price-tag-group {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background-color: #1e293b;
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  width: 100%;
 }
 
 .price-main {
@@ -118,6 +127,7 @@
   align-items: center;
   text-align: center;
   color: #ffffff;
+  flex-shrink: 0;
 }
 
 .promo-pill {
@@ -159,7 +169,7 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Controles */
+/* Controles de navegación */
 .banner-nav-btn {
   position: absolute;
   top: 50%;
@@ -175,6 +185,7 @@
   justify-content: center;
   font-size: 1.2rem;
   transition: background 0.2s;
+  z-index: 10;
 }
 
 .banner-nav-btn:hover {
@@ -196,22 +207,31 @@
   height: 26px;
   font-size: 0.65rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
 }
 
-/* Puntos de paginación */
+/* Puntos inferiores reactivos al tema */
 .banner-dots {
   display: flex;
   justify-content: center;
   gap: 6px;
   padding: 10px 0;
+  background-color: var(--bg-primary);
+  transition: background-color 0.25s ease;
 }
 
 .dot {
   width: 32px;
   height: 5px;
-  background-color: #cbd5e1;
+  background-color: var(--border-color);
   border-radius: 4px;
   cursor: pointer;
+  border: none;
+  padding: 0;
+  transition: background-color 0.2s ease;
 }
 
 .dot.active {

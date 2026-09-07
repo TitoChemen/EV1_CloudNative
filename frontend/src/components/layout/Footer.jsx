@@ -1,14 +1,27 @@
 import React from 'react';
 import '../../styles/Footer.css';
 
-export default function Footer() {
+export default function Footer({ onNavigate }) {
   const currentYear = new Date().getFullYear();
+
+  const handleLinkClick = (view) => {
+    if (onNavigate) {
+      onNavigate(view);
+    }
+  };
 
   return (
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-col">
-          <a href="#inicio" className="footer-brand">
+          <a
+            href="#inicio"
+            className="footer-brand"
+            onClick={(e) => {
+              e.preventDefault();
+              handleLinkClick('home');
+            }}
+          >
             Pedidos<span>360</span>
           </a>
           <p className="footer-desc">
@@ -43,10 +56,50 @@ export default function Footer() {
         <div className="footer-col">
           <h4 className="footer-title">Navegación</h4>
           <ul className="footer-links">
-            <li><a href="#inicio">Inicio</a></li>
-            <li><a href="#productos">Productos</a></li>
-            <li><a href="#nosotros">Nosotros</a></li>
-            <li><a href="#contactos">Contactos</a></li>
+            <li>
+              <a
+                href="#inicio"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('home');
+                }}
+              >
+                Inicio
+              </a>
+            </li>
+            <li>
+              <a
+                href="#productos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('home');
+                }}
+              >
+                Productos
+              </a>
+            </li>
+            <li>
+              <a
+                href="#nosotros"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('home');
+                }}
+              >
+                Nosotros
+              </a>
+            </li>
+            <li>
+              <a
+                href="#contactos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('home');
+                }}
+              >
+                Contactos
+              </a>
+            </li>
           </ul>
         </div>
 

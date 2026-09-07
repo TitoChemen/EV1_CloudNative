@@ -3,14 +3,20 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import '../../styles/Layout.css';
 
-export default function Layout({ children }) {
+export default function Layout({ children, onNavigate, user, onLogout, theme, onToggleTheme }) {
   return (
     <div className="layout-wrapper">
-      <Navbar />
+      <Navbar
+        onNavigate={onNavigate}
+        user={user}
+        onLogout={onLogout}
+        theme={theme}
+        onToggleTheme={onToggleTheme}
+      />
       <main className="layout-content">
         {children}
       </main>
-      <Footer />
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 }
