@@ -3,7 +3,15 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import '../../styles/Layout.css';
 
-export default function Layout({ children, onNavigate, user, onLogout, theme, onToggleTheme }) {
+export default function Layout({
+  children,
+  onNavigate,
+  user,
+  onLogout,
+  theme,
+  onToggleTheme,
+  onUpdateUser
+}) {
   return (
     <div className="layout-wrapper">
       <Navbar
@@ -12,6 +20,7 @@ export default function Layout({ children, onNavigate, user, onLogout, theme, on
         onLogout={onLogout}
         theme={theme}
         onToggleTheme={onToggleTheme}
+        onUpdateUser={onUpdateUser}
       />
       <main className="layout-content">
         {children}

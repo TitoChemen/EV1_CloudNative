@@ -34,7 +34,6 @@ function formatearRut(rut) {
   const cuerpo = valorLimpio.slice(0, -1);
   const dv = valorLimpio.slice(-1);
 
-  // Aplica los puntos en los miles
   const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
   return `${cuerpoFormateado}-${dv}`;
@@ -57,7 +56,6 @@ export default function Register({ onRegisterSuccess, onNavigateToLogin, onBackT
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Si el usuario escribe en el RUT, aplicamos la máscara de formato
     if (name === 'rut') {
       const rutFormateado = formatearRut(value);
       setFormData((prev) => ({ ...prev, rut: rutFormateado }));
@@ -71,19 +69,16 @@ export default function Register({ onRegisterSuccess, onNavigateToLogin, onBackT
     e.preventDefault();
     setError('');
 
-    // Validación de RUT real
     if (!validarRutChileno(formData.rut)) {
       setError('El RUT ingresado no es válido. Revisa los dígitos.');
       return;
     }
 
-    // Validación de dominio de correo
     if (!formData.email.endsWith('@gmail.com')) {
       setError('El correo debe terminar estrictamente en @gmail.com');
       return;
     }
 
-    // Validación de largo de contraseña
     if (formData.password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres');
       return;
@@ -93,7 +88,28 @@ export default function Register({ onRegisterSuccess, onNavigateToLogin, onBackT
     setTimeout(() => {
       setIsLoading(false);
       alert('¡Usuario registrado con éxito!');
-      onRegisterSuccess(formData.email);
+
+      // Objeto estricto con los 5 campos requeridos
+      const userData = {
+        nombre: formData.nombre.trim(),
+        apellido: formData.apellido.trim(),
+        rut: formData.rut.trim(),
+        email: formData.email.trim(),
+        direccion: formData.direccion.trim()
+      };
+
+      // Persistencia en la lista de cuentas para recuperarlo al iniciar sesión
+      try {
+        const storedAccounts = JSON.parse(localStorage.getItem('pedidos360_accounts') || '[]');
+        const updatedAccounts = storedAccounts.filter(
+          (acc) => acc.email.toLowerCase() !== userData.email.toLowerCase()
+        );
+        localStorage.setItem('pedidos360_accounts', JSON.stringify([...updatedAccounts, userData]));
+      } catch (err) {
+        console.error('Error al persistir la cuenta:', err);
+      }
+
+      onRegisterSuccess(userData);
     }, 500);
   };
 
@@ -116,7 +132,7 @@ export default function Register({ onRegisterSuccess, onNavigateToLogin, onBackT
         {error && <div className="register-error-alert">{error}</div>}
 
         <form className="register-form" onSubmit={handleSubmit}>
-          {/* Fila Nombre y Apellido */}
+          {/* Nombre y Apellido */}
           <div className="register-row">
             <div className="register-field-group">
               <label htmlFor="reg-nombre">Nombre *</label>
@@ -157,7 +173,7 @@ export default function Register({ onRegisterSuccess, onNavigateToLogin, onBackT
             </div>
           </div>
 
-          {/* Fila RUT con Formato y Correo */}
+          {/* RUT y Correo */}
           <div className="register-row">
             <div className="register-field-group">
               <label htmlFor="reg-rut">RUT *</label>

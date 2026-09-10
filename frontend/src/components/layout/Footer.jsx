@@ -13,6 +13,7 @@ export default function Footer({ onNavigate }) {
   return (
     <footer className="footer">
       <div className="footer-container">
+        {/* Columna Marca & Redes */}
         <div className="footer-col">
           <a
             href="#inicio"
@@ -53,6 +54,7 @@ export default function Footer({ onNavigate }) {
           </div>
         </div>
 
+        {/* Columna Navegación Directa */}
         <div className="footer-col">
           <h4 className="footer-title">Navegación</h4>
           <ul className="footer-links">
@@ -72,7 +74,7 @@ export default function Footer({ onNavigate }) {
                 href="#productos"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleLinkClick('home');
+                  handleLinkClick('products');
                 }}
               >
                 Productos
@@ -83,7 +85,7 @@ export default function Footer({ onNavigate }) {
                 href="#nosotros"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleLinkClick('home');
+                  handleLinkClick('about');
                 }}
               >
                 Nosotros
@@ -94,7 +96,7 @@ export default function Footer({ onNavigate }) {
                 href="#contactos"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleLinkClick('home');
+                  handleLinkClick('contact');
                 }}
               >
                 Contactos
@@ -103,6 +105,7 @@ export default function Footer({ onNavigate }) {
           </ul>
         </div>
 
+        {/* Columna Contacto */}
         <div className="footer-col">
           <h4 className="footer-title">Contacto</h4>
           <ul className="footer-contact">

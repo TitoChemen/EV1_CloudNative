@@ -27,7 +27,26 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHo
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      onLoginSuccess(formData.email);
+
+      // Busca la cuenta registrada para recuperar sus 5 datos
+      const registeredAccounts = JSON.parse(localStorage.getItem('pedidos360_accounts') || '[]');
+      const foundUser = registeredAccounts.find(
+        (acc) => acc.email.toLowerCase() === formData.email.trim().toLowerCase()
+      );
+
+      if (foundUser) {
+        onLoginSuccess(foundUser);
+      } else {
+        // En caso de ingresar directamente sin registrarse antes
+        const fallbackUser = {
+          nombre: formData.email.split('@')[0],
+          apellido: '',
+          rut: '',
+          email: formData.email.trim(),
+          direccion: ''
+        };
+        onLoginSuccess(fallbackUser);
+      }
     }, 500);
   };
 

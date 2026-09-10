@@ -21,7 +21,7 @@
   font-weight: 800;
 }
 
-/* Lienzo centrado de 1300px */
+/* Lienzo centrado */
 .banner-content {
   position: relative;
   max-width: 1300px;
@@ -70,51 +70,55 @@
 }
 
 .product-title {
-  color: #ffffff;
+  color: #ffffff !important;
   font-size: 0.95rem;
   margin: 10px 0 2px 0;
   font-weight: 700;
 }
 
 .product-specs {
-  color: #e0f2fe;
+  color: #e0f2fe !important;
   font-size: 0.72rem;
   margin: 0 0 10px 0;
 }
 
-/* Precios */
+/* Contenedor de Precios dentro del banner */
 .price-tag-group {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #1e293b;
+  background-color: #0f172a !important;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
   width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .price-main {
   display: flex;
   flex-direction: column;
-  padding: 4px 10px;
+  padding: 6px 10px;
   text-align: left;
 }
 
-.current-price {
-  color: #ffffff;
+/* Precios fijados estrictamente en el banner sin afectar al catálogo */
+.banner-wrapper .current-price {
+  color: #ffffff !important;
   font-weight: 800;
   font-size: 0.95rem;
+  line-height: 1.2;
 }
 
-.ref-price {
-  color: #94a3b8;
-  font-size: 0.62rem;
+.banner-wrapper .ref-price {
+  color: #94a3b8 !important;
+  font-size: 0.65rem;
+  line-height: 1.2;
 }
 
 .discount-badge {
   background-color: #6ee7b7;
-  color: #064e3b;
+  color: #064e3b !important;
   font-weight: 900;
   font-size: 0.9rem;
   padding: 8px 10px;
@@ -126,13 +130,13 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  color: #ffffff;
+  color: #ffffff !important;
   flex-shrink: 0;
 }
 
 .promo-pill {
   background-color: #0284c7;
-  color: #ffffff;
+  color: #ffffff !important;
   font-size: 0.9rem;
   font-weight: 800;
   padding: 2px 14px;
@@ -144,12 +148,12 @@
   font-weight: 900;
   line-height: 1;
   margin: 5px 0;
-  color: #22c55e;
+  color: #22c55e !important;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .promo-unit {
-  color: #ffffff;
+  color: #ffffff !important;
   font-size: 2rem;
 }
 
@@ -157,6 +161,7 @@
   font-size: 0.85rem;
   margin: 0 0 12px 0;
   letter-spacing: 0.5px;
+  color: #ffffff !important;
 }
 
 .promo-chip {
@@ -167,15 +172,16 @@
   font-weight: 800;
   font-size: 0.75rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  color: #ffffff !important;
 }
 
-/* Controles de navegación */
+/* Flechas y Controles */
 .banner-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   background: rgba(15, 23, 42, 0.7);
-  color: #ffffff;
+  color: #ffffff !important;
   border: none;
   width: 36px;
   height: 48px;
@@ -200,7 +206,7 @@
   bottom: 12px;
   right: 12px;
   background-color: #22c55e;
-  color: #ffffff;
+  color: #ffffff !important;
   border: none;
   border-radius: 4px;
   width: 26px;
@@ -213,7 +219,7 @@
   z-index: 10;
 }
 
-/* Puntos inferiores reactivos al tema */
+/* Paginador inferior */
 .banner-dots {
   display: flex;
   justify-content: center;
