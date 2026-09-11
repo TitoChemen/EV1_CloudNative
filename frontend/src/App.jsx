@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CartProvider } from './context/CartContext';
+import { useAuth } from './context/AuthContext';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Products from './pages/products';
@@ -52,7 +53,7 @@ const initialCatalog = [
     discount: '-4%',
     img: msiImg,
     badge: 'Nuevo',
-    stock: 5
+    stock: 3
   },
   {
     id: 4,
@@ -88,20 +89,13 @@ const initialCatalog = [
     discount: '-11%',
     img: msiImg,
     badge: 'Stock Limitado',
-    stock: 4
+    stock: 2
   }
 ];
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('pedidos360_user_session');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  const { user, isAdmin, logout, updateUser } = useAuth();
 
   const [products, setProducts] = useState(() => {
     try {
@@ -130,41 +124,11 @@ export default function App() {
     localStorage.setItem('pedidos360_products', JSON.stringify(updated));
   };
 
-  const handleLoginSuccess = (userData) => {
-    let fullUser;
-    if (typeof userData === 'object' && userData !== null) {
-      fullUser = userData;
-    } else {
-      const registeredAccounts = JSON.parse(localStorage.getItem('pedidos360_accounts') || '[]');
-      const found = registeredAccounts.find((acc) => acc.email === userData);
-      fullUser = found || {
-        nombre: userData ? userData.split('@')[0] : '',
-        apellido: '',
-        rut: '',
-        email: userData || '',
-        direccion: ''
-      };
-    }
-
-    setUser(fullUser);
-    localStorage.setItem('pedidos360_user_session', JSON.stringify(fullUser));
-    setCurrentPage('home');
-  };
-
   const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('pedidos360_user_session');
-  };
-
-  const handleUpdateUser = (updatedData) => {
-    setUser(updatedData);
-    localStorage.setItem('pedidos360_user_session', JSON.stringify(updatedData));
-
-    const currentAccounts = JSON.parse(localStorage.getItem('pedidos360_accounts') || '[]');
-    const updatedAccounts = currentAccounts.map((acc) =>
-      acc.email === updatedData.email ? updatedData : acc
-    );
-    localStorage.setItem('pedidos360_accounts', JSON.stringify(updatedAccounts));
+    logout();
+    if (currentPage === 'admin' || currentPage === 'history') {
+      setCurrentPage('home');
+    }
   };
 
   return (
@@ -175,7 +139,7 @@ export default function App() {
         onLogout={handleLogout}
         theme={theme}
         onToggleTheme={toggleTheme}
-        onUpdateUser={handleUpdateUser}
+        onUpdateUser={updateUser}
       >
         {currentPage === 'home' && <Home />}
         {currentPage === 'products' && (
@@ -206,16 +170,41 @@ export default function App() {
             onSelectTrackingOrder={() => setCurrentPage('tracking')}
           />
         )}
+
+        {/* Ruta Admin protegida por AuthContext */}
         {currentPage === 'admin' && (
-          <Admin
-            products={products}
-            onUpdateProducts={handleUpdateProducts}
-          />
+          isAdmin ? (
+            <Admin
+              products={products}
+              onUpdateProducts={handleUpdateProducts}
+            />
+          ) : (
+            <div style={{ textAlign: 'center', padding: '5rem 1rem' }}>
+              <h2 style={{ color: '#ef4444' }}>Acceso Restringido</h2>
+              <p>Debes iniciar sesión con la cuenta de administrador de Azure para acceder a este panel.</p>
+              <button
+                type="button"
+                style={{
+                  marginTop: '1rem',
+                  padding: '0.65rem 1.25rem',
+                  backgroundColor: '#2563eb',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '700'
+                }}
+                onClick={() => setCurrentPage('login')}
+              >
+                Ir al Inicio de Sesión
+              </button>
+            </div>
+          )
         )}
 
         {currentPage === 'login' && (
           <Login
-            onLoginSuccess={handleLoginSuccess}
+            onLoginSuccess={() => setCurrentPage('home')}
             onNavigateToRegister={() => setCurrentPage('register')}
             onBackToHome={() => setCurrentPage('home')}
           />
@@ -223,7 +212,7 @@ export default function App() {
 
         {currentPage === 'register' && (
           <Register
-            onRegisterSuccess={handleLoginSuccess}
+            onRegisterSuccess={() => setCurrentPage('home')}
             onNavigateToLogin={() => setCurrentPage('login')}
             onBackToHome={() => setCurrentPage('home')}
           />

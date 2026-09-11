@@ -9,7 +9,7 @@ export const msalConfig = {
     // URI registrada en Azure como Single-Page Application (SPA)
     redirectUri: 'http://localhost:4200',
     postLogoutRedirectUri: 'http://localhost:4200',
-    navigateToLoginRequestUrl: false
+    navigateToLoginRequestUrl: true // <-- Cambiado a true para limpiar el hash #code=... de la URL
   },
   cache: {
     cacheLocation: 'localStorage', // Mantiene la sesión iniciada al recargar

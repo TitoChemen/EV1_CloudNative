@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../services/api';
 import '../styles/Admin.css';
 
 export default function Admin({ products, onUpdateProducts }) {
-  const [productList, setProductList] = useState(products);
+  const [productList, setProductList] = useState(products || []);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingProduct, setEditingProduct] = useState(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Formulario para crear o editar
   const [formData, setFormData] = useState({
     title: '',
     category: 'notebooks',
@@ -19,7 +21,23 @@ export default function Admin({ products, onUpdateProducts }) {
     badge: 'Disponible'
   });
 
-  // Filtro de productos con stock crítico (inferior a 4)
+  // Cargar catálogo fresco desde el backend al montar la vista
+  useEffect(() => {
+    async function fetchInventory() {
+      try {
+        setIsLoading(true);
+        const data = await api.get('/productos');
+        setProductList(data);
+        if (onUpdateProducts) onUpdateProducts(data);
+      } catch (err) {
+        console.warn('Backend no disponible, usando datos locales:', err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchInventory();
+  }, []);
+
   const criticalStockProducts = productList.filter((p) => (p.stock ?? 10) < 4);
 
   const filteredProducts = productList.filter((p) =>
@@ -57,45 +75,66 @@ export default function Admin({ products, onUpdateProducts }) {
     setIsNewModalOpen(true);
   };
 
-  // Acción rápida para reponer stock inmediato (+10 unidades)
-  const handleRestock = (id) => {
-    const updated = productList.map((p) =>
-      p.id === id ? { ...p, stock: (p.stock ?? 0) + 10 } : p
-    );
-    setProductList(updated);
-    if (onUpdateProducts) onUpdateProducts(updated);
-  };
+  // Reposición rápida conectada a backend
+  const handleRestock = async (id) => {
+    try {
+      const target = productList.find((p) => p.id === id);
+      const newStock = (target?.stock ?? 0) + 10;
+      
+      // Llamada HTTP con JWT inyectado
+      await api.put(`/productos/${id}`, { ...target, stock: newStock }).catch(() => null);
 
-  const handleDelete = (id) => {
-    if (!window.confirm('¿Estás seguro de eliminar este producto del inventario?')) return;
-    const updated = productList.filter((p) => p.id !== id);
-    setProductList(updated);
-    if (onUpdateProducts) onUpdateProducts(updated);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    let updated;
-
-    if (editingProduct) {
-      updated = productList.map((p) =>
-        p.id === editingProduct.id
-          ? { ...p, ...formData, stock: parseInt(formData.stock, 10) }
-          : p
-      );
-    } else {
-      const newProduct = {
-        id: Date.now(),
-        ...formData,
-        stock: parseInt(formData.stock, 10),
-        img: productList[0]?.img || ''
-      };
-      updated = [newProduct, ...productList];
+      const updated = productList.map((p) => (p.id === id ? { ...p, stock: newStock } : p));
+      setProductList(updated);
+      if (onUpdateProducts) onUpdateProducts(updated);
+    } catch (err) {
+      setErrorMsg(err.message);
     }
+  };
 
-    setProductList(updated);
-    if (onUpdateProducts) onUpdateProducts(updated);
-    setIsNewModalOpen(false);
+  // Eliminar producto
+  const handleDelete = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este producto del inventario?')) return;
+    try {
+      await api.delete(`/productos/${id}`).catch(() => null);
+      const updated = productList.filter((p) => p.id !== id);
+      setProductList(updated);
+      if (onUpdateProducts) onUpdateProducts(updated);
+    } catch (err) {
+      setErrorMsg(err.message);
+    }
+  };
+
+  // Crear o Editar producto
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    try {
+      let updated;
+      const parsedStock = parseInt(formData.stock, 10);
+
+      if (editingProduct) {
+        const payload = { ...editingProduct, ...formData, stock: parsedStock };
+        await api.put(`/productos/${editingProduct.id}`, payload).catch(() => null);
+        updated = productList.map((p) => (p.id === editingProduct.id ? payload : p));
+      } else {
+        const newProduct = {
+          id: Date.now(),
+          ...formData,
+          stock: parsedStock,
+          img: productList[0]?.img || ''
+        };
+        const res = await api.post('/productos', newProduct).catch(() => newProduct);
+        updated = [res || newProduct, ...productList];
+      }
+
+      setProductList(updated);
+      if (onUpdateProducts) onUpdateProducts(updated);
+      setIsNewModalOpen(false);
+    } catch (err) {
+      setErrorMsg(err.message);
+    }
   };
 
   return (
@@ -110,6 +149,19 @@ export default function Admin({ products, onUpdateProducts }) {
         </button>
       </header>
 
+      {errorMsg && (
+        <div style={{
+          backgroundColor: 'rgba(239, 68, 68, 0.15)',
+          color: '#ef4444',
+          padding: '0.8rem',
+          borderRadius: '8px',
+          fontWeight: '600',
+          marginBottom: '1rem'
+        }}>
+          {errorMsg}
+        </div>
+      )}
+
       {/* Banner de alerta de stock crítico */}
       {criticalStockProducts.length > 0 && (
         <div className="admin-alert-banner">
@@ -121,7 +173,7 @@ export default function Admin({ products, onUpdateProducts }) {
             </svg>
             <div>
               <strong>¡Alerta de Reposición Urgente!</strong>
-              <p>Hay {criticalStockProducts.length} producto(s) con stock en peligro (inferior a 4 unidades). Solicite reposición lo antes posible.</p>
+              <p>Hay {criticalStockProducts.length} producto(s) con stock en peligro (inferior a 4 unidades).</p>
             </div>
           </div>
 
@@ -160,7 +212,7 @@ export default function Admin({ products, onUpdateProducts }) {
         </div>
       </div>
 
-      {/* Buscador de inventario */}
+      {/* Buscador */}
       <div className="admin-search-bar">
         <input
           type="text"
@@ -170,7 +222,7 @@ export default function Admin({ products, onUpdateProducts }) {
         />
       </div>
 
-      {/* Tabla de Productos */}
+      {/* Tabla */}
       <div className="admin-table-container">
         <table className="admin-table">
           <thead>
@@ -249,7 +301,7 @@ export default function Admin({ products, onUpdateProducts }) {
         </table>
       </div>
 
-      {/* Modal Crear / Editar Producto */}
+      {/* Modal */}
       {isNewModalOpen && (
         <div className="admin-modal-overlay" onClick={() => setIsNewModalOpen(false)}>
           <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>

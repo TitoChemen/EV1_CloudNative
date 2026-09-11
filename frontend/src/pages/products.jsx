@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Products.css';
 
-export default function Products({ user, onNavigateToLogin, products = [] }) {
+export default function Products({ onNavigateToLogin, products = [] }) {
+  const { user } = useAuth();
   const { addToCart, cartItems } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -175,7 +177,7 @@ export default function Products({ user, onNavigateToLogin, products = [] }) {
               <button
                 type="button"
                 className="btn-auth-cancel"
-                onClick={() => setShowProfileModal ? setShowProfileModal(false) : setShowAuthModal(false)}
+                onClick={() => setShowAuthModal(false)}
               >
                 Cancelar
               </button>

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import '../../styles/Navbar.css';
 
 // 1. Algoritmo de validación chileno (Módulo 11)
@@ -40,8 +41,10 @@ function formatearRut(rut) {
   return `${cuerpoFormateado}-${dv}`;
 }
 
-export default function Navbar({ onNavigate, user, onLogout, theme, onToggleTheme, onUpdateUser }) {
+export default function Navbar({ onNavigate, theme, onToggleTheme }) {
   const { totalCount } = useCart();
+  const { user, isAdmin, logout, updateUser } = useAuth();
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -90,7 +93,7 @@ export default function Navbar({ onNavigate, user, onLogout, theme, onToggleThem
   const handleConfirmLogout = () => {
     setShowLogoutConfirm(false);
     setIsDropdownOpen(false);
-    if (onLogout) onLogout();
+    logout();
   };
 
   const handleOpenProfile = () => {
@@ -118,9 +121,7 @@ export default function Navbar({ onNavigate, user, onLogout, theme, onToggleThem
       return;
     }
 
-    if (onUpdateUser) {
-      onUpdateUser(editForm);
-    }
+    updateUser(editForm);
     setShowProfileModal(false);
   };
 
@@ -192,17 +193,22 @@ export default function Navbar({ onNavigate, user, onLogout, theme, onToggleThem
                 Contactos
               </a>
             </li>
-            <li>
-              <a
-                href="#admin"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick('admin');
-                }}
-              >
-                Admin
-              </a>
-            </li>
+
+            {/* Solo visible si es la cuenta de Azure de administración */}
+            {isAdmin && (
+              <li>
+                <a
+                  href="#admin"
+                  style={{ color: '#2563eb', fontWeight: '800' }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavClick('admin');
+                  }}
+                >
+                  Admin
+                </a>
+              </li>
+            )}
           </ul>
 
           <div className="nav-actions">
@@ -282,16 +288,20 @@ export default function Navbar({ onNavigate, user, onLogout, theme, onToggleThem
                         Seguimiento de envío
                       </button>
 
-                      <button
-                        type="button"
-                        className="dropdown-item"
-                        onClick={() => {
-                          handleNavClick('admin');
-                          setIsDropdownOpen(false);
-                        }}
-                      >
-                        Panel Admin
-                      </button>
+                      {/* Solo visible en el dropdown si es la cuenta de Azure */}
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          className="dropdown-item"
+                          style={{ color: '#2563eb', fontWeight: 'bold' }}
+                          onClick={() => {
+                            handleNavClick('admin');
+                            setIsDropdownOpen(false);
+                          }}
+                        >
+                          Panel Admin
+                        </button>
+                      )}
 
                       <button
                         type="button"

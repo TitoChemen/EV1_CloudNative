@@ -1,44 +1,34 @@
-import React, { useState } from 'react';
-import { useMsal } from '@azure/msal-react';
-import { loginRequest } from '../config/auth-config';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import '../styles/login.css';
 
 export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHome }) {
-  const { instance } = useMsal();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const { user, loginWithMicrosoft, loginLocal, isAuthenticating } = useAuth();
+
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Flujo de autenticación con Azure Entra ID
-  const handleMicrosoftLogin = async () => {
+  // Si MSAL ya procesó el login o restauró la sesión, redirige automáticamente
+  useEffect(() => {
+    if (user && onLoginSuccess) {
+      onLoginSuccess();
+    }
+  }, [user, onLoginSuccess]);
+
+  const handleAzureLogin = async () => {
     try {
-      setIsLoading(true);
       setError('');
-      const response = await instance.loginPopup(loginRequest);
-      const account = response.account;
-
-      // Estructuramos el usuario con los datos de Azure
-      const fullName = account.name || 'Usuario';
-      const nameParts = fullName.split(' ');
-
-      const azureUser = {
-        nombre: nameParts[0] || 'Usuario',
-        apellido: nameParts.slice(1).join(' ') || '',
-        rut: '11.111.111-1', // RUT por defecto para autocompletar envíos
-        email: account.username || account.idTokenClaims?.email || '',
-        direccion: 'Av. Concha y Toro'
-      };
-
-      onLoginSuccess(azureUser);
+      const loggedUser = await loginWithMicrosoft();
+      if (loggedUser && onLoginSuccess) {
+        onLoginSuccess();
+      }
     } catch (err) {
-      console.error('Error al autenticar con Azure:', err);
-      setError('No se pudo autenticar con Microsoft: ' + (err.message || ''));
-    } finally {
-      setIsLoading(false);
+      // Ignorar si el usuario simplemente cerró la ventana emergente
+      if (!err.message?.includes('user_cancelled')) {
+        setError('Error al autenticar con Microsoft: ' + (err.message || ''));
+      }
     }
   };
 
@@ -59,25 +49,14 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHo
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-
-      const registeredAccounts = JSON.parse(localStorage.getItem('pedidos360_accounts') || '[]');
-      const foundUser = registeredAccounts.find(
+      const accounts = JSON.parse(localStorage.getItem('pedidos360_accounts') || '[]');
+      const foundUser = accounts.find(
         (acc) => acc.email.toLowerCase() === formData.email.trim().toLowerCase()
       );
 
-      if (foundUser) {
-        onLoginSuccess(foundUser);
-      } else {
-        const fallbackUser = {
-          nombre: formData.email.split('@')[0],
-          apellido: '',
-          rut: '',
-          email: formData.email.trim(),
-          direccion: ''
-        };
-        onLoginSuccess(fallbackUser);
-      }
-    }, 500);
+      loginLocal(foundUser || formData.email.trim());
+      if (onLoginSuccess) onLoginSuccess();
+    }, 400);
   };
 
   return (
@@ -98,11 +77,10 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHo
 
         {error && <div className="login-error-alert">{error}</div>}
 
-        {/* Botón de inicio con Azure / Microsoft */}
         <button
           type="button"
-          onClick={handleMicrosoftLogin}
-          disabled={isLoading}
+          onClick={handleAzureLogin}
+          disabled={isAuthenticating}
           style={{
             width: '100%',
             display: 'flex',
@@ -117,8 +95,7 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHo
             fontWeight: '700',
             fontSize: '0.92rem',
             cursor: 'pointer',
-            marginBottom: '1.25rem',
-            transition: 'background-color 0.2s ease'
+            marginBottom: '1.25rem'
           }}
         >
           <svg width="18" height="18" viewBox="0 0 21 21">
@@ -127,7 +104,7 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHo
             <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
             <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
           </svg>
-          <span>Continuar con Microsoft</span>
+          <span>{isAuthenticating ? 'Conectando...' : 'Continuar con Microsoft'}</span>
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
