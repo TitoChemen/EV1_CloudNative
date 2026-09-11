@@ -30,7 +30,6 @@ function validarRutChileno(rutCompleto) {
 
 // 2. Formateador dinámico y límite de dígitos (máx 9 caracteres limpios: 12.345.678-K)
 function formatearRut(rut) {
-  // Solo permite números y K, recortando a un máximo de 9 caracteres
   const valorLimpio = rut.replace(/[^0-9kK]/g, '').toUpperCase().slice(0, 9);
   if (valorLimpio.length <= 1) return valorLimpio;
 
@@ -114,7 +113,6 @@ export default function Navbar({ onNavigate, user, onLogout, theme, onToggleThem
   const handleSaveProfile = (e) => {
     e.preventDefault();
 
-    // Valida formato y dígito verificador antes de guardar
     if (!validarRutChileno(editForm.rut)) {
       setRutError('El RUT ingresado no es válido. Revisa los dígitos.');
       return;
@@ -148,6 +146,7 @@ export default function Navbar({ onNavigate, user, onLogout, theme, onToggleThem
             Pedidos<span>360</span>
           </a>
 
+          {/* Enlaces Principales */}
           <ul className="nav-links">
             <li>
               <a
@@ -191,6 +190,17 @@ export default function Navbar({ onNavigate, user, onLogout, theme, onToggleThem
                 }}
               >
                 Contactos
+              </a>
+            </li>
+            <li>
+              <a
+                href="#admin"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick('admin');
+                }}
+              >
+                Admin
               </a>
             </li>
           </ul>
@@ -248,6 +258,39 @@ export default function Navbar({ onNavigate, user, onLogout, theme, onToggleThem
                         onClick={handleOpenProfile}
                       >
                         Mis datos
+                      </button>
+
+                      <button
+                        type="button"
+                        className="dropdown-item"
+                        onClick={() => {
+                          handleNavClick('history');
+                          setIsDropdownOpen(false);
+                        }}
+                      >
+                        Mis compras
+                      </button>
+
+                      <button
+                        type="button"
+                        className="dropdown-item"
+                        onClick={() => {
+                          handleNavClick('tracking');
+                          setIsDropdownOpen(false);
+                        }}
+                      >
+                        Seguimiento de envío
+                      </button>
+
+                      <button
+                        type="button"
+                        className="dropdown-item"
+                        onClick={() => {
+                          handleNavClick('admin');
+                          setIsDropdownOpen(false);
+                        }}
+                      >
+                        Panel Admin
                       </button>
 
                       <button

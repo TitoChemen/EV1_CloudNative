@@ -1,90 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
 import '../styles/Products.css';
-import lenovoImg from '../assets/lenovo-loq.png';
-import gigabyteImg from '../assets/notebook-gamer-gigabyte.png';
-import msiImg from '../assets/msi-katana.png';
-import lenovoSlime from '../assets/lenovo-slime-5.png';
-import nvidia4070 from '../assets/nvidia-4070.png';
-import monitorGigabyteGS27 from '../assets/monitor-gigabyte-gs27.png';
 
-const initialProducts = [
-  {
-    id: 1,
-    category: 'notebooks',
-    title: 'Notebook Gamer Lenovo® LOQ',
-    specs: 'Core i7 RTX 4060 16" WUXGA 16GB 1TB SSD',
-    currentPrice: '$1.459.990',
-    refPrice: '$1.899.990',
-    discount: '-23%',
-    img: lenovoImg,
-    badge: 'Oferta'
-  },
-  {
-    id: 2,
-    category: 'notebooks',
-    title: 'Notebook Gamer Gigabyte® AORUS',
-    specs: 'Ryzen 9 RTX 4070 16" 32GB 1TB SSD',
-    currentPrice: '$1.819.990',
-    refPrice: '$1.969.000',
-    discount: '-8%',
-    img: gigabyteImg,
-    badge: 'Destacado'
-  },
-  {
-    id: 3,
-    category: 'notebooks',
-    title: 'Notebook Gamer MSI Katana 15 B12V',
-    specs: '15.6" FHD, i7 12650H, RTX 4070 8GB, RAM 16GB, SSD 512GB',
-    currentPrice: '$1.799.990',
-    refPrice: '$1.880.990',
-    discount: '-4%',
-    img: msiImg,
-    badge: 'Nuevo'
-  },
-  {
-    id: 4,
-    category: 'notebooks',
-    title: 'Notebook Gamer Lenovo Legion Slime 5',
-    specs: '16AHP9, R7 8845HS, RTX 4060, 16" 240Hz, 16GB RAM, 1TB SSD, W11',
-    currentPrice: '$1.299.990',
-    refPrice: '$1.599.990',
-    discount: '-18%',
-    img: lenovoSlime,
-    badge: 'Más Vendido'
-  },
-  {
-    id: 5,
-    category: 'perifericos',
-    title: 'Monitor Gamer Gigabyte GS27QC GAMING 27"',
-    specs: 'VA - QHD - 1ms - 165hz/OC 170hz',
-    currentPrice: '$278.890',
-    refPrice: '$299.990',
-    discount: '-7%',
-    img: monitorGigabyteGS27,
-    badge: 'Oferta'
-  },
-  {
-    id: 6,
-    category: 'componentes',
-    title: 'Tarjeta de Video RTX 4070 Super 12GB',
-    specs: 'GDDR6X, Triple Fan, PCIe 4.0, DLSS 3.5',
-    currentPrice: '$699.990',
-    refPrice: '$789.990',
-    discount: '-11%',
-    img: nvidia4070,
-    badge: 'Stock Limitado'
-  }
-];
-
-export default function Products({ user, onNavigateToLogin }) {
-  const { addToCart } = useCart();
+export default function Products({ user, onNavigateToLogin, products = [] }) {
+  const { addToCart, cartItems } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const filteredProducts = useMemo(() => {
-    return initialProducts.filter((product) => {
+    return products.filter((product) => {
       const matchesCategory =
         selectedCategory === 'all' || product.category === selectedCategory;
       const matchesSearch =
@@ -92,13 +17,23 @@ export default function Products({ user, onNavigateToLogin }) {
         product.specs.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchTerm]);
+  }, [products, selectedCategory, searchTerm]);
 
   const handleAddToCartClick = (product) => {
     if (!user) {
       setShowAuthModal(true);
       return;
     }
+
+    const itemInCart = cartItems.find((item) => item.id === product.id);
+    const inCartQty = itemInCart ? itemInCart.quantity : 0;
+    const availableStock = product.stock ?? 10;
+
+    if (inCartQty >= availableStock) {
+      alert(`No puedes añadir más. El stock máximo disponible es de ${availableStock} unidades.`);
+      return;
+    }
+
     addToCart(product);
   };
 
@@ -161,45 +96,68 @@ export default function Products({ user, onNavigateToLogin }) {
         </div>
       ) : (
         <div className="catalog-grid">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="catalog-card">
-              {product.badge && <span className="card-badge">{product.badge}</span>}
+          {filteredProducts.map((product) => {
+            const currentStock = product.stock ?? 10;
+            const isOutOfStock = currentStock <= 0;
 
-              <div className="card-img-box">
-                <img src={product.img} alt={product.title} className="card-img" />
-              </div>
+            return (
+              <div key={product.id} className="catalog-card">
+                {product.badge && <span className="card-badge">{product.badge}</span>}
 
-              <div className="card-content">
-                <h3 className="card-title">{product.title}</h3>
-                <p className="card-specs">{product.specs}</p>
-
-                <div className="card-pricing">
-                  <div className="price-box">
-                    <span className="current-price">{product.currentPrice}</span>
-                    <span className="ref-price">Ref: {product.refPrice}</span>
-                  </div>
-                  <span className="discount-pill">{product.discount}</span>
+                <div className="card-img-box">
+                  {product.img && <img src={product.img} alt={product.title} className="card-img" />}
                 </div>
 
-                <button
-                  type="button"
-                  className="card-buy-btn"
-                  onClick={() => handleAddToCartClick(product)}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="9" cy="21" r="1" />
-                    <circle cx="20" cy="21" r="1" />
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                  </svg>
-                  <span>Añadir al Carro</span>
-                </button>
+                <div className="card-content">
+                  <h3 className="card-title">{product.title}</h3>
+                  <p className="card-specs">{product.specs}</p>
+
+                  {/* Stock Disponible */}
+                  <div style={{ margin: '0.4rem 0 0.8rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
+                    <span style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: isOutOfStock ? '#ef4444' : currentStock <= 3 ? '#eab308' : '#22c55e'
+                    }} />
+                    <span style={{ color: isOutOfStock ? '#ef4444' : 'var(--text-muted)', fontWeight: '600' }}>
+                      {isOutOfStock ? 'Agotado (0 disponibles)' : `Disponibles: ${currentStock} unid.`}
+                    </span>
+                  </div>
+
+                  <div className="card-pricing">
+                    <div className="price-box">
+                      <span className="current-price">{product.currentPrice}</span>
+                      {product.refPrice && <span className="ref-price">Ref: {product.refPrice}</span>}
+                    </div>
+                    {product.discount && <span className="discount-pill">{product.discount}</span>}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="card-buy-btn"
+                    disabled={isOutOfStock}
+                    style={{
+                      opacity: isOutOfStock ? 0.5 : 1,
+                      cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                      backgroundColor: isOutOfStock ? '#64748b' : '#2563eb'
+                    }}
+                    onClick={() => handleAddToCartClick(product)}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="9" cy="21" r="1" />
+                      <circle cx="20" cy="21" r="1" />
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                    </svg>
+                    <span>{isOutOfStock ? 'Sin Stock' : 'Añadir al Carro'}</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Modal aviso inicio de sesión */}
       {showAuthModal && (
         <div className="auth-required-overlay" onClick={() => setShowAuthModal(false)}>
           <div className="auth-required-card" onClick={(e) => e.stopPropagation()}>
@@ -217,7 +175,7 @@ export default function Products({ user, onNavigateToLogin }) {
               <button
                 type="button"
                 className="btn-auth-cancel"
-                onClick={() => setShowAuthModal(false)}
+                onClick={() => setShowProfileModal ? setShowProfileModal(false) : setShowAuthModal(false)}
               >
                 Cancelar
               </button>
