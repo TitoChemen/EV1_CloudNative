@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useMsal } from '@azure/msal-react';
+import { loginRequest } from '../config/auth-config';
 import '../styles/login.css';
 
 export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHome }) {
+  const { instance } = useMsal();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -9,6 +12,35 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHo
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Flujo de autenticación con Azure Entra ID
+  const handleMicrosoftLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      const response = await instance.loginPopup(loginRequest);
+      const account = response.account;
+
+      // Estructuramos el usuario con los datos de Azure
+      const fullName = account.name || 'Usuario';
+      const nameParts = fullName.split(' ');
+
+      const azureUser = {
+        nombre: nameParts[0] || 'Usuario',
+        apellido: nameParts.slice(1).join(' ') || '',
+        rut: '11.111.111-1', // RUT por defecto para autocompletar envíos
+        email: account.username || account.idTokenClaims?.email || '',
+        direccion: 'Av. Concha y Toro'
+      };
+
+      onLoginSuccess(azureUser);
+    } catch (err) {
+      console.error('Error al autenticar con Azure:', err);
+      setError('No se pudo autenticar con Microsoft: ' + (err.message || ''));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,7 +60,6 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHo
     setTimeout(() => {
       setIsLoading(false);
 
-      // Busca la cuenta registrada para recuperar sus 5 datos
       const registeredAccounts = JSON.parse(localStorage.getItem('pedidos360_accounts') || '[]');
       const foundUser = registeredAccounts.find(
         (acc) => acc.email.toLowerCase() === formData.email.trim().toLowerCase()
@@ -37,7 +68,6 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHo
       if (foundUser) {
         onLoginSuccess(foundUser);
       } else {
-        // En caso de ingresar directamente sin registrarse antes
         const fallbackUser = {
           nombre: formData.email.split('@')[0],
           apellido: '',
@@ -67,6 +97,44 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onBackToHo
         </div>
 
         {error && <div className="login-error-alert">{error}</div>}
+
+        {/* Botón de inicio con Azure / Microsoft */}
+        <button
+          type="button"
+          onClick={handleMicrosoftLogin}
+          disabled={isLoading}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.75rem',
+            padding: '0.8rem',
+            borderRadius: '8px',
+            border: '1px solid var(--border-color)',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-main)',
+            fontWeight: '700',
+            fontSize: '0.92rem',
+            cursor: 'pointer',
+            marginBottom: '1.25rem',
+            transition: 'background-color 0.2s ease'
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 21 21">
+            <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+            <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+            <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+            <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+          </svg>
+          <span>Continuar con Microsoft</span>
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
+          <span>o con correo regular</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
+        </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="login-field-group">
