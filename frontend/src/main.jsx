@@ -16,7 +16,11 @@ msalInstance.initialize().then(async () => {
       msalInstance.setActiveAccount(response.account);
     }
   } catch (err) {
-    console.error('Error procesando respuesta:', err);
+    console.error('Error procesando respuesta de Azure:', err);
+    // Limpia la barra de direcciones para romper el bucle del error
+    if (window.location.hash || window.location.search) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 
   const accounts = msalInstance.getAllAccounts();
