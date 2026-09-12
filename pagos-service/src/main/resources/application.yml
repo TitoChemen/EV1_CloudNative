@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: pagos-service
+  config:
+    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:8888}
+  cloud:
+    config:
+      fail-fast: false
+      retry:
+        initial-interval: 2000
+        max-attempts: 10
+        multiplier: 1.5
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/8680c901-cdee-41b9-b489-95b35c8ffaf0/v2.0

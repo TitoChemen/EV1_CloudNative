@@ -1,0 +1,46 @@
+server:
+  port: 8082
+  address: 0.0.0.0
+
+spring:
+  application:
+    name: inventario-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://login.microsoftonline.com/8680c901-cdee-41fb-b489-95b35c8ffaf0/discovery/v2.0/keys
+          audiences: c64efc77-580d-403d-bd8e-f89813aa0265
+
+  datasource:
+    # Cambiar 'bd_facturacion' por la base de datos correspondiente a cada servicio
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/bd_inventario}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    config:
+      request-connect-timeout: 2000
+      request-read-timeout: 5000
+      fail-fast: false
+    loadbalancer:
+      enabled: true
+  logging:
+    level:
+      org.springframework.security: DEBUG
+      org.springframework.security.oauth2: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+  instance:
+    instance-id: ${spring.application.name}:${random.value}
+    prefer-ip-address: true
