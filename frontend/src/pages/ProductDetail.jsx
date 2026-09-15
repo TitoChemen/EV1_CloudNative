@@ -8,7 +8,7 @@ export default function ProductDetail({ id, onBack }) {
 
     useEffect(() => {
         // Se eliminó el /api/v1 duplicado
-        api.get(`/productos/${id}`)
+        api.get(`/api/v1/productos/${id}`)
             .then(data => setProduct(data))
             .catch(err => console.error("Error cargando producto:", err));
     }, [id]);
