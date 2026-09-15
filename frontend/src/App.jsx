@@ -15,7 +15,7 @@ import Admin from './pages/Admin';
 import './styles/App.css';
 import ProductDetail from "./pages/ProductDetail.jsx";
 
-const API_GATEWAY_URL = 'http://localhost:9000/api/v1/productos';
+const API_GATEWAY_URL = '/api/v1/productos';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
