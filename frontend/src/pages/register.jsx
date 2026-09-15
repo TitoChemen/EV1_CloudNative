@@ -87,7 +87,7 @@ export default function Register({ onRegisterSuccess, onNavigateToLogin, onBackT
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:9000/api/v1/usuario', {
+      const response = await fetch('/api/v1/usuario', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
