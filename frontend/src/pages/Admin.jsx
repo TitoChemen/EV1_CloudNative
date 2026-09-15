@@ -40,7 +40,7 @@ export default function Admin({ products, onUpdateProducts, onRefreshProducts })
     try {
       setIsLoading(true);
       setErrorMsg('');
-      const data = await api.get('/productos');
+      const data = await api.get('/api/v1/productos');
       setProductList(data);
       if (onUpdateProducts) onUpdateProducts(data);
     } catch (err) {
@@ -111,7 +111,7 @@ export default function Admin({ products, onUpdateProducts, onRefreshProducts })
         precioReferencial: target.precioReferencial || parsePriceToNumber(target.refPrice)
       };
 
-      await api.put(`/productos/${id}`, payload);
+      await api.put(`/api/v1/productos/${id}`, payload);
       await fetchInventory();
     } catch (err) {
       setErrorMsg('Error al reponer stock: ' + err.message);
@@ -122,7 +122,7 @@ export default function Admin({ products, onUpdateProducts, onRefreshProducts })
     if (!window.confirm('¿Estás seguro de eliminar este producto del inventario?')) return;
     try {
       setErrorMsg('');
-      await api.delete(`/productos/${id}`);
+      await api.delete(`/api/v1/productos/${id}`);
       await fetchInventory();
     } catch (err) {
       setErrorMsg('Error al eliminar producto: ' + err.message);
@@ -150,9 +150,9 @@ export default function Admin({ products, onUpdateProducts, onRefreshProducts })
     try {
       if (editingProduct) {
         const prodId = editingProduct.idProducto || editingProduct.id;
-        await api.put(`/productos/${prodId}`, { ...payload, idProducto: prodId });
+        await api.put(`/api/v1/productos/${prodId}`, { ...payload, idProducto: prodId });
       } else {
-        await api.post('/productos', payload);
+        await api.post('/api/v1/productos', payload);
       }
 
       await fetchInventory();
