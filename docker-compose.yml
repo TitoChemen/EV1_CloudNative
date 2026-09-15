@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # Base de Datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Opcional: monta tus scripts de inicialización de esquemas si tienes init-db
+      - ./init-db:/docker-entrypoint-initdb.d
+    networks:
+      - microservices-net
+
+  # Eureka Server
+  eureka-server:
+    build: ./Eureka-Server
+    container_name: eureka-server
+    restart: on-failure
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-net
+
+  # Config Server (espera a Eureka)
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    restart: on-failure
+    ports:
+      - "8888:8888"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - microservices-net
+
+  # API Gateway
+  api-gateway:
+    build: ./Api-Gateway
+    container_name: api-gateway
+    restart: on-failure
+    ports:
+      - "9000:9000"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+    depends_on:
+      - config-server
+    networks:
+      - microservices-net
+
+  # Usuario Service
+  usuario-service:
+    build: ./usuario-service
+    container_name: usuario-service
+    restart: on-failure
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/bd_usuario?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    depends_on:
+      - config-server
+      - mysql
+    networks:
+      - microservices-net
+
+  # Producto Service
+  producto-service:
+    build: ./producto-service
+    container_name: producto-service
+    restart: on-failure
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/bd_producto?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    depends_on:
+      - config-server
+      - mysql
+    networks:
+      - microservices-net
+
+  # Frontend
+  frontend:
+    build: ./frontend
+    container_name: frontend-app
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - microservices-net
+
+volumes:
+  mysql_data:
+
+networks:
+  microservices-net:
+    driver: bridge
