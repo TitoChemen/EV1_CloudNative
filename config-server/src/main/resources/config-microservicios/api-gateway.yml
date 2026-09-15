@@ -33,7 +33,7 @@ spring:
             - id: usuario-service
               uri: lb://usuario-service
               predicates:
-                - Path=/api/v1/usuario/**, /v3/api-docs/usuario-service
+                - Path=/api/v1/usuario/**, /v3/api-docs/usuario-service, /api/v1/usuario
               filters:
                 - RewritePath=/v3/api-docs/usuario-service, /v3/api-docs
 

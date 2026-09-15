@@ -34,7 +34,7 @@ public class SecurityConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:5173", "http://localhost:3000"));
+        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:5173", "http://localhost:3000","https://107.23.150.144"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -50,13 +50,13 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .cors(ServerHttpSecurity.CorsSpec::disable)
+                .cors(ServerHttpSecurity.CorsSpec::disable) // Delega al CorsWebFilter de arriba
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers("/api/v1/productos/**", "/api/v1/productos").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/v1/usuario", "/api/v1/usuario/").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/v1/usuario/**").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/v1/usuario/login").permitAll()
+                        // Permitir registro público en todas sus variantes
+                        .pathMatchers(HttpMethod.POST, "/api/v1/usuario", "/api/v1/usuario/", "/api/v1/usuario/**").permitAll()
+                        .pathMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
