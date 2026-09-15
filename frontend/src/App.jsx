@@ -9,7 +9,7 @@ import Contact from './pages/contact';
 import Carrito from './pages/Carrito';
 import Login from './pages/login';
 import Register from './pages/register';
-import Seguimiento from './pages/Seguimiento';
+import Seguimiento from './pages/seguimiento';
 import Historial from './pages/Historial';
 import Admin from './pages/Admin';
 import './styles/App.css';
