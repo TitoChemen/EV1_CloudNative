@@ -7,11 +7,26 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: https://login.microsoftonline.com/8680c901-cdee-41fb-b489-95b35c8ffaf0/discovery/v2.0/keys
-          issuer-uri: https://sts.windows.net/8680c901-cdee-41fb-b489-95b35c8ffaf0/
+          issuer-uri: https://login.microsoftonline.com/8680c901-cdee-41fb-b489-95b35c8ffaf0/v2.0
   application:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "https://107.23.150.144"
+              - "http://localhost:5173"
+              - "http://localhost:3000"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
       server:
         webflux:
           routes:
@@ -77,25 +92,18 @@ springdoc:
     urls:
       - name: Usuario
         url: /v3/api-docs/usuario-service
-
       - name: Carrito
         url: /v3/api-docs/carrito-service
-
       - name: Inventario
         url: /v3/api-docs/inventario-service
-
       - name: Pagos
         url: /v3/api-docs/pagos-service
-
       - name: Facturas
         url: /v3/api-docs/facturaciones-service
-
       - name: Transporte
         url: /v3/api-docs/transporte-service
-
       - name: Productos
         url: /v3/api-docs/producto-service
-
       - name: Notificaciones
         url: /v3/api-docs/notificaciones-service
 

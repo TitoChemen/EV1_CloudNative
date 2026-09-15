@@ -90,13 +90,12 @@ services:
     networks:
       - microservices-net
 
-  # Frontend
   frontend:
     build: ./frontend
     container_name: frontend-app
     restart: always
     ports:
-      - "80:80"
+      - "443:443"
     depends_on:
       - api-gateway
     networks:

@@ -1,7 +1,7 @@
 import { msalInstance, apiRequest } from "../config/auth-config";
 
-// Cambia "3000" por el puerto donde realmente se levanta tu backend o API Gateway
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:9000";
+// Si VITE_API_URL no está definido, usa string vacío para llamadas relativas con Nginx
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 async function getAccessToken() {
   let account = msalInstance.getActiveAccount();
@@ -11,7 +11,8 @@ async function getAccessToken() {
       account = accounts[0];
       msalInstance.setActiveAccount(account);
     } else {
-      throw new Error("No hay sesión activa. Por favor, inicia sesión.");
+      // Retorna null si no hay usuario autenticado (permite endpoints públicos como productos)
+      return null;
     }
   }
 
@@ -22,25 +23,32 @@ async function getAccessToken() {
     });
     return response.accessToken;
   } catch (error) {
-    const response = await msalInstance.acquireTokenPopup({
-      ...apiRequest,
-      account: account,
-    });
-    return response.accessToken;
+    try {
+      const response = await msalInstance.acquireTokenPopup({
+        ...apiRequest,
+        account: account,
+      });
+      return response.accessToken;
+    } catch (popupErr) {
+      console.warn("No se pudo obtener token de acceso:", popupErr);
+      return null;
+    }
   }
 }
 
 export async function request(endpoint, options = {}) {
   const token = await getAccessToken();
 
-  // 1. IMPRIME EL TOKEN EN LA CONSOLA (F12)
-  console.log("Token enviado al backend:", token);
-
   const headers = {
     "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`,
     ...options.headers,
   };
+
+  // Solo adjunta la cabecera Authorization si existe un token válido
+  if (token) {
+    console.log("Token enviado al backend:", token);
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   const fullUrl = endpoint.startsWith("http") ? endpoint : `${API_BASE_URL}${endpoint}`;
 
@@ -62,10 +70,10 @@ export async function request(endpoint, options = {}) {
 }
 
 export const api = {
-  get: (url) => request(url, { method: "GET" }),
-  post: (url, data) => request(url, { method: "POST", body: JSON.stringify(data) }),
-  put: (url, data) => request(url, { method: "PUT", body: JSON.stringify(data) }),
-  delete: (url) => request(url, { method: "DELETE" }),
+  get: (url, options) => request(url, { method: "GET", ...options }),
+  post: (url, data, options) => request(url, { method: "POST", body: JSON.stringify(data), ...options }),
+  put: (url, data, options) => request(url, { method: "PUT", body: JSON.stringify(data), ...options }),
+  delete: (url, options) => request(url, { method: "DELETE", ...options }),
 };
 
 export default api;

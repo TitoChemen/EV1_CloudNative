@@ -10,7 +10,7 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: https://login.microsoftonline.com/8680c901-cdee-41fb-b489-95b35c8ffaf0/discovery/v2.0/keys
-          issuer-uri: https://sts.windows.net/8680c901-cdee-41fb-b489-95b35c8ffaf0/
+          issuer-uri: https://login.microsoftonline.com/8680c901-cdee-41fb-b489-95b35c8ffaf0/v2.0
   datasource:
     # Cambiar 'bd_producto' por la base de datos correspondiente a cada servicio
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/bd_producto}
